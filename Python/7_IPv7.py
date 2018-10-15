@@ -53,5 +53,68 @@ class IPAddress(object):
 		"""Returns true if ABBA pattern is matched in st"""
 		p = re.compile(r'(.)(?!\1)(.)\2\1')									# find ABBA patern
 		return bool(p.search(st))											# return True if pattern found		
+		
+	# # FOR PART 2 #
+	# def supportSSL(self):
+		
+	
+	def isABA(self, st):
+		"""Returns matched ABA patterns as list of tuples"""
+		p = re.compile(r'(.)(?!\1)(.)\1')	
+		try:
+			chrs = p.findall(st)
+			return chrs[:]													# [(ext1,int1),(ext2,int2),...]
+		except:
+			return None
+			
+	def isABARow(self, row):
+		"""Returns matched ABA patterns for whole address as a list of tuples"""
+		chrs = []
+		for st in row:
+			if self.isABA(st) == None:
+				continue
+			else:
+				chrs.extend(self.isABA(st))
+		return chrs
+			
+	def isBAB(self, a, b, st):
+		"""Returns true if given BAB pattern is matched in st"""
+		pattern = r"" + b + a + b
+		p = re.compile(pattern)
+		return bool(p.search(st))
+		
+	def isBABRow(self, a, b, row):
+		"""Returns true if given BAB pattern is matched in row"""
+		for st in row:
+			if self.isBAB(a, b, st):
+				return True
+		return False
 
 print(sum([IPAddress(row).supportTLS() for row in data]))					# how many IPs support TLS?
+
+cnt = 0
+for row in data:							# iterating through rows
+	ip = IPAddress(row)						# IP address
+	[ins, outs] = ip.splitAddress()			# splitting with brackets
+	matchedABA = ip.isABARow(ins)			# list of matched ABA patterns
+	for tuples in matchedABA:				# trying each corresp. BAB pattern
+		if ip.isBABRow(*tuples, outs):
+			cnt += 1
+			break
+	# print(cnt, row, matchedABA)
+print(cnt)
+
+# --- Part Two ---
+# You would also like to know which IPs support SSL (super-secret listening).
+
+# An IP supports SSL if it has an Area-Broadcast Accessor, or ABA, anywhere in the supernet sequences (outside any square bracketed sections), and a corresponding Byte Allocation Block, or BAB, anywhere in the hypernet sequences. An ABA is any three-character sequence which consists of the same character twice with a different character between them, such as xyx or aba. A corresponding BAB is the same characters but in reversed positions: yxy and bab, respectively.
+
+# For example:
+
+# aba[bab]xyz supports SSL (aba outside square brackets with corresponding bab within square brackets).
+# xyx[xyx]xyx does not support SSL (xyx, but no corresponding yxy).
+# aaa[kek]eke supports SSL (eke in supernet with corresponding kek in hypernet; the aaa sequence is not related, because the interior character must be different).
+# zazbz[bzb]cdb supports SSL (zaz has no corresponding aza, but zbz has a corresponding bzb, even though zaz and zbz overlap).
+# How many IPs in your puzzle input support SSL?
+
+# Your puzzle answer was 260.
