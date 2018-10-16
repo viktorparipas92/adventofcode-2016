@@ -49,6 +49,17 @@ class Screen(object):
 		self.width  = sizeX										
 		self.height = sizeY
 		self.matrix = self.createMatrix()
+	def arrayPrint(self):
+		"""Prints screen in a readable way"""
+		# mx = [[self.matrix[i][j].on for j in range(self.height)] for i in range(self.width)]
+		mx = [["." for i in range(self.width)] for j in range(self.height)]
+		for j in range(self.height):
+			for i in range(self.width):
+				if self.matrix[i][j].on:
+					mx[j][i] = "#"
+		for j in range(self.height):
+			print("".join(mx[j]))
+			
 	def createMatrix(self):
 		"""Creates array of pixels"""
 		return [[Pixel((i,j)) for j in range(self.height)] for i in range(self.width)]
@@ -56,17 +67,51 @@ class Screen(object):
 		"""Turns on all pixels in a rectangle"""
 		for i in range(A):
 			for j in range(B):
-				self.matrix[i][j].turnOn()
+				self.matrix[i][j].turnOn()								# updates pixels in rectangle
 	def rotateRow(self, A, B):
 		"""Rotates row y=A by B"""
-		print(len(self.matrix))
-		tempRow = [self.matrix[i][A].on for i in range(self.width)]
-		return tempRow
-		
+		oldList = [self.matrix[i][A].on for i in range(self.width)]		# creates list of booleans for each pixel
+		newList = oldList[-B:] + oldList[:-B]							# rotates list of booleans to the right
+		for i in range(self.width):										# updates pixels
+			self.matrix[i][A].on = newList[i]
+	def rotateColumn(self, A, B):
+		"""Rotates column x=A by B"""
+		oldList = [self.matrix[A][j].on for j in range(self.height)]	# creates list of booleans for each pixel
+		newList = oldList[-B:] + oldList[:-B]							# rotates list of booleans down
+		for j in range(self.height):									# updates pixels
+			self.matrix[A][j].on = newList[j]
+	def executeInstruction(self, line):
+		"""Parses the instruction contained in line"""
+		words = line.split()											# split string into list
+		if words[0] == "rect":
+			size = [int(i) for i in words[1].split('x')]				# size of rectangle to be lit	
+			A = size[0]
+			B = size[1]
+			self.rectangleOn(A, B)
+		else:
+			A = int(words[2].split('=')[1])								# index of row/column
+			B = int(words[4])											# shift by B
+			if words[1] == "row":
+				self.rotateRow(A, B)
+			else:
+				self.rotateColumn(A, B)
+	def numberOfPixelsLit(self):
+		"""Counts how many pixels are on in the screen"""
+		Lit = [[int(self.matrix[i][j].on) for j in range(self.height)] for i in range(self.width)]
+		return sum(sum(x) for x in Lit)
+				
 with open("8_TwoFactorAuthentication.txt",'r') as file:
-	data = [row.strip() for row in file.readlines()]
+	data = [row.strip() for row in file.readlines()]	# formatting raw data
 
-screen = Screen()
-screen.matrix
-x = screen.rotateRow(1, 3)
-print(x)
+screen = Screen()										# creating screen
+for row in data:										# going through instructions				
+	screen.executeInstruction(row)						# execute each instruction
+	
+print(screen.numberOfPixelsLit())
+
+# --- Part Two ---
+# You notice that the screen is only capable of displaying capital letters; in the font it uses, each letter is 5 pixels wide and 6 tall.
+
+# After you swipe your card, what code is the screen trying to display?
+	
+screen.arrayPrint()
