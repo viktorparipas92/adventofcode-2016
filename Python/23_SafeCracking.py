@@ -51,9 +51,9 @@ class Monorail(object):
 		self.registers[x] = self.val(x) - 1
 		self.idx += 1
 	def tgl(self, x):								# TOGGLE
-		self.tglbuf.append(self.idx + self.val(x))		# Add given index to buffer
+		self.tglbuf.append(self.idx + self.val(x))	# Add given index to buffer
 		self.idx += 1								# Increment current index
-		print(self.tglbuf)
+		# print(self.tglbuf)
 	def jnz(self, x, y):
 		if self.val(x) != 0:
 			self.idx += self.val(y)
@@ -68,7 +68,7 @@ class Monorail(object):
 		"""Parses line of instruction"""
 		lst   = line.split()				# line is split into list
 		cmd   = lst[0]
-		if self.idx in set(self.tglbuf):		# If command is toggled
+		if self.idx in set(self.tglbuf):	# If command is toggled
 			cmd = self.toggle(cmd)			# toggle command
 		param = lst[1:]
 		if cmd == "cpy":
@@ -81,7 +81,7 @@ class Monorail(object):
 			self.jnz(*param)
 		elif cmd == "tgl":
 			self.tgl(*param)
-		print(self.idx, cmd, self.tglbuf, self.registers)
+		# print(self.idx, cmd, self.tglbuf, self.registers)
 	def executeData(self, data):
 		"""Executes all instructions"""
 		while self.idx < len(data):	
@@ -89,10 +89,6 @@ class Monorail(object):
 			self.parse(line)
 	def toggle(self, cmd):
 		"""Toggle commands"""
-		# Invoked if current index found in toggle-buffer
-		# Remove index from buffer
-		self.tglbuf.remove(self.idx)
-		# Perform toggle
 		if cmd == "inc":
 			return "dec"
 		elif cmd == "tgl" or cmd == "dec":
@@ -109,3 +105,8 @@ safe = Monorail()
 safe.registers["a"] = 7
 safe.executeData(data)
 print(safe.registers["a"])
+
+safe2 = Monorail()
+safe2.registers["a"] = 12
+safe2.executeData(data)
+print(safe2.registers["a"])
