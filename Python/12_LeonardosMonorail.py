@@ -82,7 +82,7 @@ print(monorail.registers["a"])
 # Your puzzle answer was 9227737.
 
 monorail2 = Monorail()
-monorail2.registers["c"] = 12
+monorail2.registers["c"] = 1
 monorail2.executeData(data)
 print(monorail2.registers["a"])
 
