@@ -23,6 +23,7 @@
 
 # Now, you just need to generate a new scrambled password and you can access the system. Given the list of scrambling operations in your puzzle input, what is the result of scrambling abcdefgh?
 
+from itertools import permutations
 class Scramble(object):
 	def __init__(self, input):
 		self.strng = list(input)
@@ -55,33 +56,6 @@ class Scramble(object):
 				else:
 					X = X + 1
 			self.rotate(drctn, X)
-	def unscramble(self, line):
-		"""Parses line"""
-		lst = line.split()
-		if lst[0] == "swap":						# easily reversible
-			X = lst[2]
-			Y = lst[5]
-			self.swap(X, Y)
-		elif lst[0] == "reverse":					# easily reversible
-			X = int(lst[2])
-			Y = int(lst[4])
-			self.reverse(X, Y)
-		elif lst[0] == "move":						# easily reversible
-			X = int(lst[2])
-			Y = int(lst[5])
-			self.move(Y, X)							# swap indices
-		elif lst[0] == "rotate":
-			drctn = lst[1]
-			if lst[1] != "based":					# rotate given num. of times
-				X = int(lst[2]) % len(self.strng)
-			else:									# rotate based on position
-				A = lst[6]
-				X = self.strng.index(A)
-				if X >= 4:
-					X = X + 2
-				else:
-					X = X + 1
-			self.unRotate(drctn, X)
 	def swap(self, X, Y):
 		"""Swaps letters X and Y | letters at position X and Y"""
 		if not X.isalpha():	# swap position
@@ -104,12 +78,58 @@ class Scramble(object):
 		else:
 			Y = len(self.strng) - X							# "right" or "based"
 			self.strng = self.strng[Y:] + self.strng[:Y]
+	# PART 2
+	def unscramble(self, line):
+		"""Parses and unscrambles line"""
+		lst = line.split()
+		if lst[0] == "swap":						# easily reversible
+			X = lst[2]
+			Y = lst[5]
+			self.swap(X, Y)
+		elif lst[0] == "reverse":					# easily reversible
+			X = int(lst[2])
+			Y = int(lst[4])
+			self.reverse(X, Y)
+		elif lst[0] == "move":						# easily reversible
+			X = int(lst[2])
+			Y = int(lst[5])
+			self.move(Y, X)							# swap indices
+		elif lst[0] == "rotate":
+			drctn = lst[1]
+			if lst[1] != "based":					# rotate given num. of times
+				X = int(lst[2]) % len(self.strng)
+				self.unRotate(drctn, X)
+			else:									# rotate based on position
+				A = lst[6]
+				self.unRotateBased(A)
 	def unRotate(self, drctn, X):
+		"""Un-rotate in given direction"""
 		if drctn == "right":
 			self.strng = self.strng[X:] + self.strng[:X]
 		else:
-			Y = len(self.strng) - X							# "left" or "based"
+			Y = len(self.strng) - X					# "left" or "based"
 			self.strng = self.strng[Y:] + self.strng[:Y]
+	def unRotateBased(self, A):
+		"""Un-rotate based on position of char A""" 
+		st = self.strng								# string to un-rotate
+		n  = len(st)
+		perm = [[st[i - j] for i in range(n)] for j in range(n, 0, -1)]
+		for i in perm:								# string to rotate
+			rot = self.rotateBased(i, A)			# rotated string		
+			if rot == st:							# if result and rotated are same
+				self.strng = i						# right permutation found
+				break	
+	
+	# HELP FUNCTION
+	def rotateBased(self, st, A):
+		"""Returns rotated string based on position of char A"""
+		X = st.index(A)
+		if X >= 4:
+			X = X + 2
+		else:
+			X = X + 1
+		Y = len(st) - X
+		return st[Y:] + st[:Y]
 
 start = "abcdefgh"
 filename = "21_ScrambledLettersHash.txt"
@@ -126,3 +146,10 @@ print(scrmble)
 # You scrambled the password correctly, but you discover that you can't actually modify the password file on the system. You'll need to un-scramble one of the existing passwords by reversing the scrambling process.
 
 # What is the un-scrambled version of the scrambled password fbgdceah?
+
+start = "fbgdceah"
+unscrmble = Scramble(start)
+
+for i in data[::-1]:
+	unscrmble.unscramble(i)
+print(unscrmble)
