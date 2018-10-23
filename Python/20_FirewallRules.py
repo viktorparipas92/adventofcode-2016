@@ -42,12 +42,47 @@ while i < len(data):
 		i     = 0
 		lowestIP = hi + 1
 print(lowestIP)
+
+def sumOfRanges(lst):
+	return sum((r.stop - r.start) for r in lst)
 	
 # --- Part Two ---
 # How many IPs are allowed by the blacklist?
 
-x = range(4294967295 + 1)
-y = range(0,0)
-for i in data:
-	(lo, hi) = parseLine(i)
-	y = chain(y, range(lo, hi+1))
+input = 4294967295
+# input = 9
+x = range(input + 1)
+lst = []
+lst.append(x)
+for line in data:
+	(lo, hi) = parseLine(line)
+	for i,l in enumerate(lst):
+		# print(line, l)
+		# print(lo, hi, l.start, l.stop)
+		if lo > l.start and hi <= l.stop - 1:									# new range is inside old range, l.start < lo > hi < l.stop
+			# print("New range", (lo, hi), "is inside old", l) 
+			lst.remove(l)														# remove new range, split old into two
+			lst.append(range(l.start, lo))
+			lst.append(range(hi + 1, l.stop))							
+			
+		elif l.stop > lo > l.start and hi > l.stop - 1:						# new range intersects with old range, l.start < lo < l.stop < hi
+			# old range 3-5, new range 4-7
+			# l.start 3, l.stop 5, lo 4, hi 7
+			# print("New range", (lo, hi), "intersects with old", l, "from above")
+			lst[i] = range(l.start, lo)			# modify old range
+		
+		elif lo <= l.start and l.start <= hi <= l.stop - 1:							# new range intersects with old range, lo < l.start < hi < l.stop
+			# old range 3-7, new range 2-5
+			# l.start 3, l.stop 7, lo 2, hi 5
+			# print("New range", (lo, hi), "intersects with old", l, "from below")
+			lst[i] = range(hi + 1, l.stop)		# modify old range
+		
+		else:																	# no intersection, lo < hi < l.start < l.stop OR l.start < lstop < lo < hi
+			# print("New range", (lo, hi), "does not intersect with", l)
+			pass							# nothing to do
+	# print(line, lst, sumOfRanges(lst))
+print(sumOfRanges(lst)) # 173920085 too high
+# for l in lst:
+	# for i in l:
+		# print(i)
+	
