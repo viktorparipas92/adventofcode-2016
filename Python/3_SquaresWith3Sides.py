@@ -11,14 +11,6 @@
 
 # Your puzzle answer was 862.
 
-def parseTriangle(str):
-	str   = str.rstrip()
-	sides = str.split()
-	a = int(sides[0])
-	b = int(sides[1])
-	c = int(sides[2])
-	return (a, b, c)
-
 class triangle(object):
 	def __init__(self, a, b, c):
 		self.a = a
@@ -33,8 +25,16 @@ class triangle(object):
 		return "Triangle with sides %s %s and %s"%(self.a, self.b, self.c)
 	@classmethod
 	def fromString(cls, str):
-		sides = parseTriangle(str)
+		sides = cls.parseTriangle(str)
 		return cls(*sides)
+	@staticmethod
+	def parseTriangle(str):
+		str   = str.rstrip()
+		sides = str.split()
+		a = int(sides[0])
+		b = int(sides[1])
+		c = int(sides[2])
+		return (a, b, c)
 		
 
 with open("3_SquaresWith3Sides.txt",'r') as file:
